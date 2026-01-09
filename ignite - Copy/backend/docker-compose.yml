@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  labta-backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock  # For Docker-in-Docker
+    environment:
+      - DATABASE_URL=sqlite:///data/labta.db
+      - DOCKER_SANDBOX_ENABLED=true
+      - RAG_ENABLED=true
+    restart: unless-stopped
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  # Optional: ChromaDB for vector storage
+  chromadb:
+    image: chromadb/chroma:latest
+    ports:
+      - "8001:8000"
+    restart: unless-stopped
